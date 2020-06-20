@@ -22,6 +22,8 @@ public class SpacecraftController : MonoBehaviour
 
     public GameObject HUD;
 
+    public ParticleSystem particleSystem;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,6 +58,9 @@ public class SpacecraftController : MonoBehaviour
             if (touch.phase == TouchPhase.Ended && destroyedObstacles>= currentOrbit.requiredDestroyedObstacles)
             {
                 destroyedObstacles -= currentOrbit.requiredDestroyedObstacles;
+                particleSystem.maxParticles = destroyedObstacles;
+                particleSystem.Stop();
+                particleSystem.Play();
                 currentOrbit.CreatePortal(gameObject.transform.position);
                 speed = 5;
             }
@@ -114,6 +119,7 @@ public class SpacecraftController : MonoBehaviour
         {
             OrbitObstacleSpawner.activeObstacles.Remove(closestObject);
             destroyedObstacles += 1;
+            particleSystem.maxParticles = destroyedObstacles;
             Destroy(closestObject);
         }
 
