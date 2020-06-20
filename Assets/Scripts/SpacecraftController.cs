@@ -18,7 +18,8 @@ public class SpacecraftController : MonoBehaviour
     public float criticalDistance = 0.1f;
     private float nextObstacleAngle = -1f;
     private bool isNextObstacleDestroyed;
-    private float coolDownCounter = 0.5f;
+    private float coolDownCounter = 0.0f;
+    public float spacecraftSpeed = 1500;
 
     private int destroyedObstacles = 0;
 
@@ -38,12 +39,12 @@ public class SpacecraftController : MonoBehaviour
     {
         currentIndex = index;
         currentOrbit = gameController.GetOrbit(index);
+        speed = currentOrbit.GetOrbitSpeed(spacecraftSpeed);
         currentOrbit.RequestSpawnOfObstacles(index, startingAngle);
         x = currentOrbit.X;
         y = currentOrbit.Y;
         a = currentOrbit.A;
         b = currentOrbit.B;
-        speed = 1;
         destroyedObstacles = 0;
         nextObstacleAngle = -1f;
     }
@@ -79,7 +80,7 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.Stop();
                 particleSystem.Play();
                 currentOrbit.CreatePortal(gameObject.transform.position);
-                speed = 3;
+                speed *= 3;
             }
         }*/
 
@@ -117,13 +118,13 @@ public class SpacecraftController : MonoBehaviour
             }
         }
 
-        if (!isNextObstacleDestroyed && Math.Abs(currentAngleInDegrees - nextObstacleAngle) < criticalDistance)
+        if (!isNextObstacleDestroyed && currentOrbit.GetDistanceToNextObstacle(currentAngleInDegrees) < criticalDistance)
         {
             Destroy(gameObject);
             HUD.SetActive(true);
         }
 
-        alpha += speed;
+        alpha += speed * Time.deltaTime;
         gameObject.transform.position = GetSpacecraftPosition(alpha);
         gameObject.transform.LookAt(GetSpacecraftPosition(alpha + 1), currentOrbit.transform.up);
     }
