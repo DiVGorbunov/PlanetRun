@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using Input = InputWrapper.Input;
 
@@ -15,10 +14,11 @@ public class SpacecraftController : MonoBehaviour
     private GameController gameController;
 
     public float coolDownAfterShot = 0.0f;
-
     public float shotRange = 3.0f;
-
-    private float coolDownCounter = 0.0f;
+    public float criticalDistance = 0.1f;
+    private float nextObstacleAngle = -1f;
+    private bool isNextObstacleDestroyed;
+    private float coolDownCounter = 0.5f;
 
     private int destroyedObstacles = 0;
 
@@ -30,25 +30,38 @@ public class SpacecraftController : MonoBehaviour
     void Start()
     {
         gameController = GameObject.FindObjectOfType<GameController>();
-        SetOrbit(0, 0);
     }
 
-    void SetOrbit(int index, float startingAngle)
+    public void SetOrbit(int index, float startingAngle)
     {
         currentIndex = index;
         currentOrbit = gameController.GetOrbit(index);
-        gameController.RequestSpawnOfObstacles(index, startingAngle);
+        currentOrbit.RequestSpawnOfObstacles(index, startingAngle);
         x = currentOrbit.X;
         y = currentOrbit.Y;
         a = currentOrbit.A;
         b = currentOrbit.B;
         speed = 1;
         destroyedObstacles = 0;
+        nextObstacleAngle = -1f;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (gameController.IsPause)
+        {
+            return;
+        }
+
+        var currentAngleInDegrees = GetCurrentAngleInDegrees();
+
+        if (nextObstacleAngle < 0 || (isNextObstacleDestroyed && currentAngleInDegrees > nextObstacleAngle))
+        {
+            nextObstacleAngle = currentOrbit.GetNextObstacleAngle(currentAngleInDegrees);
+            isNextObstacleDestroyed = false;
+        }
+
         if (coolDownCounter > 0.0f)
         {
             coolDownCounter -= Time.deltaTime;
@@ -64,19 +77,14 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.Stop();
                 particleSystem.Play();
                 currentOrbit.CreatePortal(gameObject.transform.position);
-                speed = 1;
+                speed = 3;
             }
         }
 
         if (currentOrbit.IsAroundPortal(gameObject.transform.position))
         {
-            float startAngle = alpha * 0.005f * (float)Math.PI / 180;
-            SetOrbit(currentIndex + 1, startAngle);
+            SetOrbit(currentIndex + 1, GetCurrentAngleInDegrees());
         }
-
-        alpha += speed;
-        gameObject.transform.position = GetSpacecraftPosition(alpha);
-        gameObject.transform.LookAt(GetSpacecraftPosition(alpha + 1), currentOrbit.transform.up);
 
         if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
         {
@@ -91,6 +99,26 @@ public class SpacecraftController : MonoBehaviour
                 Debug.Log("Can't shoot");
             }
         }
+
+        if (!isNextObstacleDestroyed && Math.Abs(currentAngleInDegrees - nextObstacleAngle) < criticalDistance)
+        {
+            Destroy(gameObject);
+            HUD.SetActive(true);
+        }
+
+        alpha += speed;
+        gameObject.transform.position = GetSpacecraftPosition(alpha);
+        gameObject.transform.LookAt(GetSpacecraftPosition(alpha + 1), currentOrbit.transform.up);
+    }
+
+    private float GetCurrentAngleInDegrees()
+    {
+        var originalAngle = alpha * 0.005f * 180 / (float)Math.PI;
+        while (originalAngle > 360)
+        {
+            originalAngle -= 360;
+        }
+        return originalAngle;
     }
 
     private Vector3 GetSpacecraftPosition(float newAlpha)
@@ -104,47 +132,17 @@ public class SpacecraftController : MonoBehaviour
     private void Shoot()
     {
         //right now just search for closest obstacle
-
-        float closest = 100.0f;
-        GameObject closestObject = null;
-        foreach(var o in OrbitObstacleSpawner.activeObstacles)
-        {
-            float objDistance = Vector3.Distance(this.gameObject.transform.position, o.transform.position);
-
-            if (objDistance < closest)
-            {
-                closest = objDistance;
-                closestObject = o;
-            }
-        }
+        var currentAngle = GetCurrentAngleInDegrees();
+        var closest = currentOrbit.GetDistanceToNextObstacle(currentAngle);
         Debug.Log("Closest is: " + closest);
         if (closest<shotRange)
         {
             destroyedObstacles += 1;
-            closestObject.SetActive(false);
-            StartCoroutine("RestoreObstacle", closestObject);
+            currentOrbit.DeactivateNextObstacle(currentAngle);
+            isNextObstacleDestroyed = true;
             particleSystem.maxParticles = destroyedObstacles;
         }
 
         coolDownCounter = coolDownAfterShot;
-    }
-
-    private IEnumerator RestoreObstacle(object obstacleObj)
-    {
-        GameObject obstacle = (GameObject)obstacleObj;
-        yield return new WaitForSeconds(2f);
-        obstacle.SetActive(true);
-    }
-
-    private void OnTriggerEnter(Collider collider)
-    {
-        Debug.Log("Trigger");
-        if (collider.gameObject.tag == "Obstacle")
-        {
-            Debug.Log("Obstacle");
-            Destroy(gameObject);
-
-            HUD.SetActive(true);
-        }
     }
 }

@@ -126,9 +126,7 @@ GameObject:
   - component: {fileID: 7923334315493209361}
   - component: {fileID: 378655381983644532}
   - component: {fileID: 642455618060964810}
-  - component: {fileID: 2142826480552548092}
   - component: {fileID: 1857214847}
-  - component: {fileID: 6469975804128578375}
   m_Layer: 0
   m_Name: Spacecraft
   m_TagString: Player
@@ -199,19 +197,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &2142826480552548092
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8993342082270295473}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1857214847
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,24 +212,9 @@ MonoBehaviour:
   speed: 3
   coolDownAfterShot: 0.5
   shotRange: 3
+  criticalDistance: 0.1
   HUD: {fileID: 0}
   particleSystem: {fileID: 6544583800574281804}
---- !u!54 &6469975804128578375
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8993342082270295473}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1001 &6544583800594077580
 PrefabInstance:
   m_ObjectHideFlags: 0

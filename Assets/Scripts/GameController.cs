@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.SceneManagement;
@@ -7,16 +6,26 @@ using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour
 {
     public OrbitController[] orbits;
+    public SpacecraftController spacecraft;
     public GameObject obstacle;
     public GameObject portal;
     public float proximity = 0.2f;
 
-    public OrbitObstacleSpawner spawner;
+    private bool isPause;
+    public bool IsPause => isPause;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        isPause = true;
+        StartCoroutine("StartGame");
+    }
+
+    IEnumerator StartGame()
+    {
+        yield return new WaitForSeconds(0.01f);
+        isPause = false;
+        spacecraft.SetOrbit(0, 0);
     }
 
     // Update is called once per frame
@@ -28,11 +37,6 @@ public class GameController : MonoBehaviour
     public OrbitController GetOrbit(int index)
     {
         return orbits[index];
-    }
-
-    public void RequestSpawnOfObstacles(int index, float startingAngle)
-    {
-        spawner.SpawnNewObstacles(orbits[index],3*(index+1), startingAngle);
     }
 
     public void Restart()
