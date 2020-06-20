@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Input = InputWrapper.Input;
+using UnityEngine.SceneManagement;
 
 public class SpacecraftController : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class SpacecraftController : MonoBehaviour
     private OrbitController currentOrbit;
 
     private GameController gameController;
+
+    public float coolDownAfterShot = 0.5f;
+
+    public float shotRange = 3.0f;
+
+    private float coolDownCounter = 0.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -34,6 +41,11 @@ public class SpacecraftController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (coolDownCounter > 0.0f)
+        {
+            coolDownCounter -= Time.deltaTime;
+        }
+
         if (Input.touchCount > 0)
         {
             var touch = Input.GetTouch(0);
@@ -58,7 +70,15 @@ public class SpacecraftController : MonoBehaviour
         if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("Pressed shot");
-            Shoot();
+            if (coolDownCounter <= 0.0f)
+            {
+                Debug.Log("Shooting");
+                Shoot();
+            }
+            else
+            {
+                Debug.Log("Can't shoot");
+            }
         }
     }
 
@@ -79,11 +99,13 @@ public class SpacecraftController : MonoBehaviour
             }
         }
         Debug.Log("Closest is: " + closest);
-        if (closest<3.0f)
+        if (closest<shotRange)
         {
             OrbitObstacleSpawner.activeObstacles.Remove(closestObject);
             Destroy(closestObject);
         }
+
+        coolDownCounter = coolDownAfterShot;
     }
 
     private void OnTriggerEnter(Collider collider)
@@ -93,6 +115,7 @@ public class SpacecraftController : MonoBehaviour
         {
             Debug.Log("Obstacle");
             Destroy(gameObject);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 }
