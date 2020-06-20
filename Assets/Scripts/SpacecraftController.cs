@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Input = InputWrapper.Input;
-using UnityEngine.SceneManagement;
 
 public class SpacecraftController : MonoBehaviour
 {
@@ -18,6 +17,8 @@ public class SpacecraftController : MonoBehaviour
     public float shotRange = 3.0f;
 
     private float coolDownCounter = 0.0f;
+
+    public GameObject HUD;
 
     // Start is called before the first frame update
     void Start()
@@ -115,7 +116,8 @@ public class SpacecraftController : MonoBehaviour
         {
             Debug.Log("Obstacle");
             Destroy(gameObject);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+            HUD.SetActive(true);
         }
     }
 }

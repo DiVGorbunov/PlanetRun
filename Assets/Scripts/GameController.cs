@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.SceneManagement;
+
 public class GameController : MonoBehaviour
 {
     public OrbitController[] orbits;
@@ -31,5 +33,10 @@ public class GameController : MonoBehaviour
     public void RequestSpawnOfObstacles(int index)
     {
         spawner.SpawnNewObstacles(orbits[index],3*(index+1));
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
