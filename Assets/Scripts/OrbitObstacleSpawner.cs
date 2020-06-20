@@ -4,25 +4,28 @@ using UnityEngine;
 
 public class OrbitObstacleSpawner : MonoBehaviour
 {
-    public OrbitController orbit;
+    //public OrbitController orbit;
     public GameObject ObstaclePrefab;
 
-    public int maxCount = 3;
+    //public int maxCount = 3;
 
     public static List<GameObject> activeObstacles;
     // Start is called before the first frame update
     void Start()
     {
+        
+    }
+
+    public void SpawnNewObstacles(OrbitController orbit, int count)
+    {
         activeObstacles = new List<GameObject>();
-        for (int i = 0; i < maxCount; i++)
+        for (int i = 0; i < count; i++)
         {
             Vector3 position = orbit.GetRandomPointOnPerimeter();
-           
+
             GameObject obstacle = Instantiate(ObstaclePrefab, position, Quaternion.identity);
             activeObstacles.Add(obstacle);
         }
-
-        
     }
 
     // Update is called once per frame

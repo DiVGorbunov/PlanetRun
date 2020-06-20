@@ -23,6 +23,7 @@ public class SpacecraftController : MonoBehaviour
     {
         currentIndex = index;
         currentOrbit = gameController.GetOrbit(index);
+        gameController.RequestSpawnOfObstacles(index);
         x = currentOrbit.X;
         y = currentOrbit.Y;
         a = currentOrbit.A;
