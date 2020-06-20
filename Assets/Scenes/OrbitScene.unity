@@ -183,6 +183,10 @@ PrefabInstance:
       propertyPath: HUD
       value: 
       objectReference: {fileID: 279283144}
+    - target: {fileID: 1857214847, guid: 70f716ce5f60ec54e8d656c6d8d47107, type: 3}
+      propertyPath: coolDownAfterShot
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 642455618060964810, guid: 70f716ce5f60ec54e8d656c6d8d47107,
         type: 3}
       propertyPath: m_CastShadows

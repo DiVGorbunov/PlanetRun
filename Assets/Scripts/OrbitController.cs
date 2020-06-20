@@ -133,4 +133,10 @@ public class OrbitController : MonoBehaviour
         yield return new WaitForSeconds(2f);
         obstacle.SetActive(true);
     }
+
+    public float GetOrbitSpeed(float spaceCraftSpeed)
+    {
+        var p = 2 * Mathf.PI * Mathf.Sqrt((A * A + B * B) / 2);
+        return spaceCraftSpeed / p;
+    }
 }
