@@ -26,6 +26,8 @@ public class SpacecraftController : MonoBehaviour
 
     public ParticleSystem particleSystem;
 
+    private bool needHandlePortalShot = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -67,10 +69,25 @@ public class SpacecraftController : MonoBehaviour
             coolDownCounter -= Time.deltaTime;
         }
 
-        if (Input.touchCount > 0)
+        /*if (Input.touchCount > 0)
         {
             var touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Ended && destroyedObstacles>= currentOrbit.requiredDestroyedObstacles)
+            {
+                destroyedObstacles -= currentOrbit.requiredDestroyedObstacles;
+                particleSystem.maxParticles = destroyedObstacles;
+                particleSystem.Stop();
+                particleSystem.Play();
+                currentOrbit.CreatePortal(gameObject.transform.position);
+                speed = 3;
+            }
+        }*/
+
+        if (needHandlePortalShot)
+        {
+            needHandlePortalShot = false;
+
+            if (destroyedObstacles >= currentOrbit.requiredDestroyedObstacles)
             {
                 destroyedObstacles -= currentOrbit.requiredDestroyedObstacles;
                 particleSystem.maxParticles = destroyedObstacles;
@@ -144,5 +161,10 @@ public class SpacecraftController : MonoBehaviour
         }
 
         coolDownCounter = coolDownAfterShot;
+    }
+
+    public void RequestPortalShot()
+    {
+        needHandlePortalShot = true;
     }
 }

@@ -120,17 +120,53 @@ public class OrbitController : MonoBehaviour
         return obstacleAngles[nextObstacleIndex];
     }
 
+    public delegate void del();
+
     public void DeactivateNextObstacle(float currentAngleInDegrees)
     {
         var nextObstacle = obstacles[GetNextObstacleIndex(currentAngleInDegrees)];
-        nextObstacle.SetActive(false);
-        StartCoroutine("RestoreObstacle", nextObstacle);
+        //nextObstacle.SetActive(false);
+
+        Vector3 savedPosition = nextObstacle.transform.position;
+
+        StartCoroutine(AnimateSize(nextObstacle,0.5f, 0.1f, 0.5f, new del(() => { nextObstacle.SetActive(false); })));
+
+        StartCoroutine(RestoreObstacle(nextObstacle, savedPosition));
     }
 
-    private IEnumerator RestoreObstacle(object obstacleObj)
+    protected IEnumerator AnimateSize(GameObject obstacle, float startValue, float endValue, float duration, del action)
+    {
+        float elapsedTime = 0;
+        float ratio = elapsedTime / duration;
+        while (ratio < 1f)
+        {
+            elapsedTime += Time.deltaTime;
+            ratio = elapsedTime / duration;
+
+            float size = startValue + (endValue - startValue) * ratio;
+
+            setSize(obstacle, size);
+
+            yield return null;
+        }
+
+        if (action != null)
+        {
+            action();
+        }
+    }
+
+    private void setSize(GameObject obstacle, float size)
+    {
+        obstacle.transform.localScale = new Vector3(size, size, size);
+    }
+
+    private IEnumerator RestoreObstacle(object obstacleObj, Vector3 position)
     {
         GameObject obstacle = (GameObject)obstacleObj;
+        obstacle.transform.position = position;
         yield return new WaitForSeconds(2f);
+        setSize(obstacle, 0.5f);
         obstacle.SetActive(true);
     }
 }
