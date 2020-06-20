@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Input = InputWrapper.Input;
 
@@ -112,12 +113,19 @@ public class SpacecraftController : MonoBehaviour
         Debug.Log("Closest is: " + closest);
         if (closest<shotRange)
         {
-            OrbitObstacleSpawner.activeObstacles.Remove(closestObject);
             destroyedObstacles += 1;
-            Destroy(closestObject);
+            closestObject.SetActive(false);
+            StartCoroutine("RestoreObstacle", closestObject);
         }
 
         coolDownCounter = coolDownAfterShot;
+    }
+
+    private IEnumerator RestoreObstacle(object obstacleObj)
+    {
+        GameObject obstacle = (GameObject)obstacleObj;
+        yield return new WaitForSeconds(2f);
+        obstacle.SetActive(true);
     }
 
     private void OnTriggerEnter(Collider collider)
