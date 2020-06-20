@@ -10,6 +10,8 @@ public class OrbitController : MonoBehaviour
 
     public int obstacles;
 
+    public int requiredDestroyedObstacles;
+
     private GameController gameController;
     private Vector3 portalPosition;
     private bool canPortal;

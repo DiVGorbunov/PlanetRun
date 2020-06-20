@@ -262,6 +262,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Orbit (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5015500655734003265, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
+        type: 3}
+      propertyPath: obstacles
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015500655734003265, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
+        type: 3}
+      propertyPath: requiredDestroyedObstacles
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5044761393314401069, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -506,6 +516,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Orbit (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015500655734003265, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
+        type: 3}
+      propertyPath: obstacles
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015500655734003265, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
+        type: 3}
+      propertyPath: requiredDestroyedObstacles
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 5044761393314401069, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
         type: 3}
@@ -1095,6 +1115,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Orbit
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015500655734003265, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
+        type: 3}
+      propertyPath: obstacles
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5015500655734003265, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
+        type: 3}
+      propertyPath: requiredDestroyedObstacles
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5044761393314401069, guid: 147d0fed58fb42e44ac3b29bddb78fdb,
         type: 3}

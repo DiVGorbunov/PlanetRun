@@ -18,6 +18,8 @@ public class SpacecraftController : MonoBehaviour
 
     private float coolDownCounter = 0.0f;
 
+    private int destroyedObstacles = 0;
+
     public GameObject HUD;
 
     // Start is called before the first frame update
@@ -37,6 +39,7 @@ public class SpacecraftController : MonoBehaviour
         a = currentOrbit.A;
         b = currentOrbit.B;
         speed = 1;
+        destroyedObstacles = 0;
     }
 
     // Update is called once per frame
@@ -50,8 +53,9 @@ public class SpacecraftController : MonoBehaviour
         if (Input.touchCount > 0)
         {
             var touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Ended)
+            if (touch.phase == TouchPhase.Ended && destroyedObstacles>= currentOrbit.requiredDestroyedObstacles)
             {
+                destroyedObstacles -= currentOrbit.requiredDestroyedObstacles;
                 currentOrbit.CreatePortal(gameObject.transform.position);
                 speed = 5;
             }
@@ -103,6 +107,7 @@ public class SpacecraftController : MonoBehaviour
         if (closest<shotRange)
         {
             OrbitObstacleSpawner.activeObstacles.Remove(closestObject);
+            destroyedObstacles += 1;
             Destroy(closestObject);
         }
 
