@@ -24,6 +24,7 @@ public class OrbitObstacleSpawner : MonoBehaviour
             Vector3 position = orbit.GetRandomPointOnPerimeter();
 
             GameObject obstacle = Instantiate(ObstaclePrefab, position, Quaternion.identity);
+            obstacle.transform.up = orbit.transform.up;
             activeObstacles.Add(obstacle);
         }
     }

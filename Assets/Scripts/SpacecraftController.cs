@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Input = InputWrapper.Input;
 
 public class SpacecraftController : MonoBehaviour
@@ -67,10 +67,8 @@ public class SpacecraftController : MonoBehaviour
         }
 
         alpha += speed;
-        var X = x + (a * Mathf.Cos(alpha * .005f));
-        var Y = y + (b * Mathf.Sin(alpha * .005f));
-        gameObject.transform.position = new Vector3(X, 0, Y);
-        gameObject.transform.right = gameObject.transform.position - new Vector3(x, 0, y);
+        gameObject.transform.position = GetSpacecraftPosition(alpha);
+        gameObject.transform.LookAt(GetSpacecraftPosition(alpha + 1), currentOrbit.transform.up);
 
         if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
         {
@@ -85,6 +83,14 @@ public class SpacecraftController : MonoBehaviour
                 Debug.Log("Can't shoot");
             }
         }
+    }
+
+    private Vector3 GetSpacecraftPosition(float newAlpha)
+    {
+        var X = x + (a * Mathf.Cos(newAlpha * .005f));
+        var Y = y + (b * Mathf.Sin(newAlpha * .005f));
+        var rotation = currentOrbit.transform.rotation;
+        return rotation * new Vector3(X, 0, Y);
     }
 
     private void Shoot()

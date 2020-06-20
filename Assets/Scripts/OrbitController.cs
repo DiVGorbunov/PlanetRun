@@ -19,7 +19,7 @@ public class OrbitController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gameController = GameObject.FindObjectOfType<GameController>();
+        gameController = FindObjectOfType<GameController>();
     }
 
     // Update is called once per frame
@@ -32,13 +32,15 @@ public class OrbitController : MonoBehaviour
         var alpha = Random.Range(0, 360);
         var x = X + (A * Mathf.Cos(alpha));
         var y = Y + (B * Mathf.Sin(alpha));
-        return new Vector3(x, 0, y);
+        var point = new Vector3(x, 0, y);
+        return transform.rotation * point;
     }
 
     public void CreatePortal(Vector3 position)
     {
         portalPosition = position;
-        Instantiate(gameController.portal, position, Quaternion.identity);
+        var portal = Instantiate(gameController.portal, position, Quaternion.identity);
+        portal.transform.up = transform.up;
         StartCoroutine("CanPortal");
     }
 
@@ -46,14 +48,6 @@ public class OrbitController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         canPortal = true;
-    }
-
-    public void CreateObstacles()
-    {
-        for (int i = 0; i < obstacles; i++)
-        {
-            Instantiate(gameController.obstacle, GetRandomPointOnPerimeter(), Quaternion.identity);
-        }
     }
 
     public bool IsAroundPortal(Vector3 position)
