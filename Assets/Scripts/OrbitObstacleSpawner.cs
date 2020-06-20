@@ -16,12 +16,13 @@ public class OrbitObstacleSpawner : MonoBehaviour
         
     }
 
-    public void SpawnNewObstacles(OrbitController orbit, int count)
+    public void SpawnNewObstacles(OrbitController orbit, int count, float startingAngle)
     {
         activeObstacles = new List<GameObject>();
+        var positions = orbit.GetRandomPointOnPerimeter(count, startingAngle);
         for (int i = 0; i < count; i++)
         {
-            Vector3 position = orbit.GetRandomPointOnPerimeter();
+            Vector3 position = positions[i];
 
             GameObject obstacle = Instantiate(ObstaclePrefab, position, Quaternion.identity);
             obstacle.transform.up = orbit.transform.up;

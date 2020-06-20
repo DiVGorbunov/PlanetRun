@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using Input = InputWrapper.Input;
 
@@ -12,7 +14,7 @@ public class SpacecraftController : MonoBehaviour
 
     private GameController gameController;
 
-    public float coolDownAfterShot = 0.5f;
+    public float coolDownAfterShot = 0.0f;
 
     public float shotRange = 3.0f;
 
@@ -28,14 +30,14 @@ public class SpacecraftController : MonoBehaviour
     void Start()
     {
         gameController = GameObject.FindObjectOfType<GameController>();
-        SetOrbit(0);
+        SetOrbit(0, 0);
     }
 
-    void SetOrbit(int index)
+    void SetOrbit(int index, float startingAngle)
     {
         currentIndex = index;
         currentOrbit = gameController.GetOrbit(index);
-        gameController.RequestSpawnOfObstacles(index);
+        gameController.RequestSpawnOfObstacles(index, startingAngle);
         x = currentOrbit.X;
         y = currentOrbit.Y;
         a = currentOrbit.A;
@@ -62,13 +64,14 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.Stop();
                 particleSystem.Play();
                 currentOrbit.CreatePortal(gameObject.transform.position);
-                speed = 5;
+                speed = 1;
             }
         }
 
         if (currentOrbit.IsAroundPortal(gameObject.transform.position))
         {
-            SetOrbit(currentIndex + 1);
+            float startAngle = alpha * 0.005f * (float)Math.PI / 180;
+            SetOrbit(currentIndex + 1, startAngle);
         }
 
         alpha += speed;
@@ -117,13 +120,20 @@ public class SpacecraftController : MonoBehaviour
         Debug.Log("Closest is: " + closest);
         if (closest<shotRange)
         {
-            OrbitObstacleSpawner.activeObstacles.Remove(closestObject);
             destroyedObstacles += 1;
+            closestObject.SetActive(false);
+            StartCoroutine("RestoreObstacle", closestObject);
             particleSystem.maxParticles = destroyedObstacles;
-            Destroy(closestObject);
         }
 
         coolDownCounter = coolDownAfterShot;
+    }
+
+    private IEnumerator RestoreObstacle(object obstacleObj)
+    {
+        GameObject obstacle = (GameObject)obstacleObj;
+        yield return new WaitForSeconds(2f);
+        obstacle.SetActive(true);
     }
 
     private void OnTriggerEnter(Collider collider)

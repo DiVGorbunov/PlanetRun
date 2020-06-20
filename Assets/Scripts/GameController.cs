@@ -30,9 +30,9 @@ public class GameController : MonoBehaviour
         return orbits[index];
     }
 
-    public void RequestSpawnOfObstacles(int index)
+    public void RequestSpawnOfObstacles(int index, float startingAngle)
     {
-        spawner.SpawnNewObstacles(orbits[index],3*(index+1));
+        spawner.SpawnNewObstacles(orbits[index],3*(index+1), startingAngle);
     }
 
     public void Restart()

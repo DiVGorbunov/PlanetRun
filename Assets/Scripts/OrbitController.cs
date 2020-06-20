@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class OrbitController : MonoBehaviour
 {
@@ -27,13 +28,22 @@ public class OrbitController : MonoBehaviour
     {
     }
 
-    public Vector3 GetRandomPointOnPerimeter()
+    public Vector3[] GetRandomPointOnPerimeter(int number, float alpha0)
     {
-        var alpha = Random.Range(0, 360);
-        var x = X + (A * Mathf.Cos(alpha));
-        var y = Y + (B * Mathf.Sin(alpha));
-        var point = new Vector3(x, 0, y);
-        return transform.rotation * point;
+        Vector3[] points = new Vector3[number];
+        float range = 360f / (number + 2);
+        float offset = 5f;
+        for (int i = 0; i < number; i++)
+        {
+            var alpha = Random.Range(alpha0 + 3*range/2 + i * range + offset, alpha0 + 3*range / 2 + (i + 1) * range - offset);
+            alpha = alpha >= 360 ? alpha - 360 : alpha;
+            var x = X + (A * Mathf.Cos(alpha * Mathf.PI / 180));
+            var y = Y + (B * Mathf.Sin(alpha * Mathf.PI / 180));
+            var point = new Vector3(x, 0, y);
+            points[i] = transform.rotation * point;
+        }
+
+        return points;
     }
 
     public void CreatePortal(Vector3 position)
