@@ -8,18 +8,16 @@ public class OrbitController : MonoBehaviour
     public float A => gameObject.transform.localScale.x / 2;
     public float B => gameObject.transform.localScale.z / 2;
 
-    public int requiredDestroyedObstacles;
-
     private GameController gameController;
     private Vector3 portalPosition;
     private bool canPortal;
-    public GameObject[] obstacles;
-    public float[] obstacleAngles;
+    private GameObject[] obstacles;
+    private float[] obstacleAngles;
+    public int obstaclesCount;
 
     // Start is called before the first frame update
     void Start()
     {
-        gameController = FindObjectOfType<GameController>();
     }
 
     // Update is called once per frame
@@ -53,6 +51,7 @@ public class OrbitController : MonoBehaviour
 
     public void SpawnNewObstacles(int count, float startingAngle)
     {
+        gameController = FindObjectOfType<GameController>();
         obstacles = new GameObject[count];
         var angles = GetRandomAnglesOnPerimeter(count, startingAngle);
         obstacleAngles = angles;
@@ -65,9 +64,9 @@ public class OrbitController : MonoBehaviour
         }
     }
 
-    public void RequestSpawnOfObstacles(int index, float startingAngle)
+    public void RequestSpawnOfObstacles(float startingAngle)
     {
-        SpawnNewObstacles(3 * (index + 1), startingAngle);
+        SpawnNewObstacles(obstaclesCount, startingAngle);
     }
 
     public void CreatePortal(Vector3 position)
@@ -98,7 +97,9 @@ public class OrbitController : MonoBehaviour
     {
         for (int i = 0; i < obstacleAngles.Length - 1; i++)
         {
-            if (currentAngleInDegrees >= obstacleAngles[i] && currentAngleInDegrees <= obstacleAngles[i + 1])
+            if ((currentAngleInDegrees >= obstacleAngles[i] && currentAngleInDegrees <= obstacleAngles[i + 1]) ||
+                (currentAngleInDegrees >= obstacleAngles[i] && obstacleAngles[i] > obstacleAngles[i + 1]) ||
+                (currentAngleInDegrees <= obstacleAngles[i + 1] && obstacleAngles[i] > obstacleAngles[i + 1]))
             {
                 return i + 1;
             }
@@ -112,6 +113,13 @@ public class OrbitController : MonoBehaviour
         Vector3 currentPosition = GetPointByAngle(currentAngleInDegrees);
         int nextObstacleIndex = GetNextObstacleIndex(currentAngleInDegrees);
         return Vector3.Distance(currentPosition, GetPointByAngle(obstacleAngles[nextObstacleIndex]));
+    }
+
+    public float GetDistanceBetweenAngles(float currentAngleInDegrees, float obstacleAngle)
+    {
+        Vector3 currentPosition = GetPointByAngle(currentAngleInDegrees);
+        Vector3 obstaclePosition = GetPointByAngle(obstacleAngle);
+        return Vector3.Distance(currentPosition, obstaclePosition);
     }
 
     public float GetNextObstacleAngle(float currentAngleInDegrees)
@@ -130,7 +138,7 @@ public class OrbitController : MonoBehaviour
     private IEnumerator RestoreObstacle(object obstacleObj)
     {
         GameObject obstacle = (GameObject)obstacleObj;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(gameController.restoreObstacleDelay);
         obstacle.SetActive(true);
     }
 
