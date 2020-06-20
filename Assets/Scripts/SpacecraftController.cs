@@ -51,9 +51,10 @@ public class SpacecraftController : MonoBehaviour
         alpha += speed;
         var X = x + (a * Mathf.Cos(alpha * .005f));
         var Y = y + (b * Mathf.Sin(alpha * .005f));
+        gameObject.transform.position = new Vector3(X, 0, Y);
         gameObject.transform.right = gameObject.transform.position - new Vector3(x, 0, y);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("Pressed shot");
             Shoot();
