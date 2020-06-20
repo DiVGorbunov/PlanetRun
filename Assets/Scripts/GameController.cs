@@ -26,10 +26,10 @@ public class GameController : MonoBehaviour
         var orbitGameObject = Instantiate(orbit, Vector3.zero, Quaternion.identity);
 
         orbitGameObject.transform.localScale = new Vector3(Random.Range(4, 6), 0, Random.Range(4, 6));
-        orbitGameObject.transform.rotation = Quaternion.Euler(new Vector3(Random.Range(-45, 45), 0, Random.Range(-45, 45)));
+        orbitGameObject.transform.rotation = Quaternion.Euler(new Vector3(Random.Range(-30, 30), 0, Random.Range(-30, 30)));
         currentOrbit = orbitGameObject.GetComponent<OrbitController>();
         currentOrbit.obstaclesCount = 3;
-        StartCoroutine(CreateNextOrbit());
+        StartCoroutine(CreateNextOrbit(false));
 
         spacecraft.StartWithOrbit(currentOrbit);
     }
@@ -37,18 +37,23 @@ public class GameController : MonoBehaviour
     public OrbitController GetNextOrbit()
     {
         var result = nextOrbit;
-        currentOrbit = nextOrbit;
-        StartCoroutine(CreateNextOrbit());
+        StartCoroutine(CreateNextOrbit(true));
         return result;
     }
 
-    IEnumerator CreateNextOrbit()
+    IEnumerator CreateNextOrbit(bool destroyCurrent)
     {
         yield return new WaitForSeconds(0.01f);
 
+        if (destroyCurrent)
+        {
+            Destroy(currentOrbit);
+            currentOrbit = nextOrbit;
+        }
+
         var orbitGameObject = Instantiate(orbit, Vector3.zero, Quaternion.identity);
         orbitGameObject.transform.localScale = new Vector3(Random.Range(1.5f, 2f) * currentOrbit.transform.localScale.x, 0, Random.Range(1.5f, 2f) * currentOrbit.transform.localScale.z);
-        orbitGameObject.transform.rotation = currentOrbit.transform.rotation;
+        orbitGameObject.transform.rotation = Quaternion.Euler(new Vector3(Random.Range(-30, 30), 0, Random.Range(-30, 30)));
 
         nextOrbit = orbitGameObject.GetComponent<OrbitController>();
         nextOrbit.obstaclesCount = currentOrbit.obstaclesCount + 3;

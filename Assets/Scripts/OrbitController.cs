@@ -8,12 +8,14 @@ public class OrbitController : MonoBehaviour
     public float A => gameObject.transform.localScale.x / 2;
     public float B => gameObject.transform.localScale.z / 2;
 
+    public int obstaclesCount;
+
     private GameController gameController;
     private Vector3 portalPosition;
     private bool canPortal;
     private GameObject[] obstacles;
     private float[] obstacleAngles;
-    public int obstaclesCount;
+    private GameObject portal;
 
     // Start is called before the first frame update
     void Start()
@@ -72,7 +74,7 @@ public class OrbitController : MonoBehaviour
     public void CreatePortal(Vector3 position)
     {
         portalPosition = position;
-        var portal = Instantiate(gameController.portal, position, Quaternion.identity);
+        portal = Instantiate(gameController.portal, position, Quaternion.identity);
         portal.transform.up = transform.up;
         StartCoroutine("CanPortal");
     }
@@ -146,5 +148,14 @@ public class OrbitController : MonoBehaviour
     {
         var p = 2 * Mathf.PI * Mathf.Sqrt((A * A + B * B) / 2);
         return spaceCraftSpeed / p;
+    }
+
+    void OnDestroy()
+    {
+        for (int i = 0; i < obstacles.Length; i++)
+        {
+            Destroy(obstacles[i]);
+        }
+        Destroy(portal);
     }
 }

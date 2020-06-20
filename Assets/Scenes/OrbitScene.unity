@@ -281,6 +281,7 @@ MonoBehaviour:
   portal: {fileID: 5515558293183789525, guid: 5949ab6c9fc15924498731b8114331ab, type: 3}
   orbit: {fileID: 4301181673155771964, guid: 147d0fed58fb42e44ac3b29bddb78fdb, type: 3}
   proximity: 0.2
+  restoreObstacleDelay: 4
 --- !u!4 &689706987
 Transform:
   m_ObjectHideFlags: 0
