@@ -224,10 +224,14 @@ public class OrbitController : MonoBehaviour
 
     void OnDestroy()
     {
-        for (int i = 0; i < obstacles.Length; i++)
+        if (obstacles != null)
         {
-            Destroy(obstacles[i]);
+            for (int i = 0; i < obstacles.Length; i++)
+            {
+                Destroy(obstacles[i]);
+            }
         }
+        
         Destroy(portal);
     }
 }
