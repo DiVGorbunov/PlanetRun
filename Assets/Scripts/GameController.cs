@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour
 {
     public SpacecraftController spacecraft;
-    public GameObject obstacle;
     public GameObject portal;
     public GameObject orbit;
     public float proximity = 0.2f;
@@ -15,9 +14,12 @@ public class GameController : MonoBehaviour
 
     private OrbitController currentOrbit, nextOrbit;
 
+    public GameObject[] Obstacles { get; set; }
+
     void Start()
     {
         StartCoroutine(StartGame());
+        Obstacles = Resources.LoadAll<GameObject>("Obstacles");
     }
 
     IEnumerator StartGame()
@@ -65,5 +67,10 @@ public class GameController : MonoBehaviour
     public void Restart()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public GameObject GetRandomObstacle()
+    {
+        return Obstacles[Random.Range(0, Obstacles.Length)];
     }
 }
