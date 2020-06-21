@@ -106,7 +106,7 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.Play();
                 if (currentOrbit.TryCreatePortal(currentAngleInDegrees))
                 {
-                    speed *= 3;
+                    speed *= gameController.accelerationMultiplier;
                 }
             }
         }

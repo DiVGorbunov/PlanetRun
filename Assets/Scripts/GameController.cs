@@ -10,7 +10,8 @@ public class GameController : MonoBehaviour
     public GameObject portal;
     public GameObject orbit;
     public float proximity = 0.2f;
-    public float restoreObstacleDelay = 4f;
+    public float restoreObstacleDelay = 2f;
+    public float accelerationMultiplier = 2f;
 
     private OrbitController currentOrbit, nextOrbit;
 
