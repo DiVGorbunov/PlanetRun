@@ -37,6 +37,10 @@ public class SpacecraftController : MonoBehaviour
     private bool needHandlePortalShot = false;
     private bool needHandleLaserShot = false;
 
+    private int currentScore = 0;
+    private float orbitAlpha = 0;
+    private int currentLevel = 0;
+
     public GameObject SpaceShipModel;
     public ParticleSystem Explosion;
 
@@ -60,6 +64,8 @@ public class SpacecraftController : MonoBehaviour
         nextObstacleAngle = -1f;
         afterCircle = false;
         hasPortal = false;
+        orbitAlpha = alpha;
+        currentLevel++;
     }
 
     public void StartWithOrbit(OrbitController orbit)
@@ -139,6 +145,9 @@ public class SpacecraftController : MonoBehaviour
 
         if (currentOrbit.IsAroundPortal(gameObject.transform.position))
         {
+            currentScore += GetScore(true, false, GetLap(), speed, currentLevel);
+            gameController.hudController.SetScore(currentScore);
+
             SetNextOrbit(gameController.GetNextOrbit(), currentAngleInDegrees);
         }
 
@@ -207,9 +216,13 @@ public class SpacecraftController : MonoBehaviour
         if (closest<shotRange)
         {
             destroyedObstacles += 1;
-            currentOrbit.DeactivateNextObstacle(currentAngle);
+            var isPlanet = currentOrbit.DeactivateNextObstacle(currentAngle);
             isNextObstacleDestroyed = true;
             particleSystem.maxParticles = destroyedObstacles;
+
+            currentScore += GetScore(false, isPlanet, GetLap(), speed, currentLevel);
+            gameController.hudController.SetScore(currentScore);
+
         }
 
         coolDownCounter = coolDownAfterShot;
@@ -263,5 +276,26 @@ public class SpacecraftController : MonoBehaviour
     {
         var meshRenderer = capsule.GetComponent<MeshRenderer>();
         meshRenderer.material = isActive ? activeCapsule : inactiveCapsule;
+    }
+
+    private int GetLap()
+    {
+        var originalAngle = (int) ((alpha - orbitAlpha) * 0.005f * 180 / (float)Math.PI);
+        return (originalAngle / 360) + 1;
+    }
+
+    public int GetScore(bool isPortal, bool isPlanet, int lap, float speed, int level)
+    {
+        if (isPortal)
+        {
+            return 10000 * level / lap;
+        }
+
+        if (isPlanet)
+        {
+            return (int) (6 * speed);
+        }
+
+        return (int) (20 * level * speed / lap);
     }
 }
