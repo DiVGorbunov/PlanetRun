@@ -8,20 +8,21 @@ public class OrbitController : MonoBehaviour
     public float A => gameObject.transform.localScale.x / 2;
     public float B => gameObject.transform.localScale.z / 2;
 
-    public int requiredDestroyedObstacles;
+    public int obstaclesCount;
+    public (float, float)[] portalIntervals;
 
     private GameController gameController;
     private Vector3 portalPosition;
     private bool canPortal;
-    public GameObject[] obstacles;
-    public float[] obstacleAngles;
+    private GameObject[] obstacles;
+    private float[] obstacleAngles;
+    private GameObject portal;
 
     private GameObject lastSpawnedPortal;
 
     // Start is called before the first frame update
     void Start()
     {
-        gameController = FindObjectOfType<GameController>();
     }
 
     // Update is called once per frame
@@ -55,6 +56,7 @@ public class OrbitController : MonoBehaviour
 
     public void SpawnNewObstacles(int count, float startingAngle)
     {
+        gameController = FindObjectOfType<GameController>();
         obstacles = new GameObject[count];
         var angles = GetRandomAnglesOnPerimeter(count, startingAngle);
         obstacleAngles = angles;
@@ -67,17 +69,39 @@ public class OrbitController : MonoBehaviour
         }
     }
 
-    public void RequestSpawnOfObstacles(int index, float startingAngle)
+    public void RequestSpawnOfObstacles(float startingAngle)
     {
-        SpawnNewObstacles(3 * (index + 1), startingAngle);
+        SpawnNewObstacles(obstaclesCount, startingAngle);
     }
 
-    public void CreatePortal(Vector3 position)
+    public bool IsInPortalInterval(float currentAngleInDegrees)
     {
-        portalPosition = position;
-        lastSpawnedPortal = Instantiate(gameController.portal, position, Quaternion.identity);
-        lastSpawnedPortal.transform.up = transform.up;
-        StartCoroutine("CanPortal");
+        for (int i = 0; i < portalIntervals.Length; i++)
+        {
+            if ((currentAngleInDegrees >= portalIntervals[i].Item1 && currentAngleInDegrees <= portalIntervals[i].Item2) ||
+                (portalIntervals[i].Item2 < portalIntervals[i].Item1 && currentAngleInDegrees <= portalIntervals[i].Item2) ||
+                (currentAngleInDegrees >= portalIntervals[i].Item1 && portalIntervals[i].Item2 < portalIntervals[i].Item1))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryCreatePortal(float currentAngleInDegrees)
+    {
+        if (IsInPortalInterval(currentAngleInDegrees))
+        {
+            portalPosition = GetPointByAngle(currentAngleInDegrees);
+            portal = Instantiate(gameController.portal, portalPosition, Quaternion.identity);
+            portal.transform.up = transform.up;
+            StartCoroutine("CanPortal");
+
+            return true;
+        }
+
+        return false;
     }
 
     public IEnumerator CanPortal()
@@ -106,7 +130,9 @@ public class OrbitController : MonoBehaviour
     {
         for (int i = 0; i < obstacleAngles.Length - 1; i++)
         {
-            if (currentAngleInDegrees >= obstacleAngles[i] && currentAngleInDegrees <= obstacleAngles[i + 1])
+            if ((currentAngleInDegrees >= obstacleAngles[i] && currentAngleInDegrees <= obstacleAngles[i + 1]) ||
+                (currentAngleInDegrees >= obstacleAngles[i] && obstacleAngles[i] > obstacleAngles[i + 1]) ||
+                (currentAngleInDegrees <= obstacleAngles[i + 1] && obstacleAngles[i] > obstacleAngles[i + 1]))
             {
                 return i + 1;
             }
@@ -120,6 +146,13 @@ public class OrbitController : MonoBehaviour
         Vector3 currentPosition = GetPointByAngle(currentAngleInDegrees);
         int nextObstacleIndex = GetNextObstacleIndex(currentAngleInDegrees);
         return Vector3.Distance(currentPosition, GetPointByAngle(obstacleAngles[nextObstacleIndex]));
+    }
+
+    public float GetDistanceBetweenAngles(float currentAngleInDegrees, float obstacleAngle)
+    {
+        Vector3 currentPosition = GetPointByAngle(currentAngleInDegrees);
+        Vector3 obstaclePosition = GetPointByAngle(obstacleAngle);
+        return Vector3.Distance(currentPosition, obstaclePosition);
     }
 
     public float GetNextObstacleAngle(float currentAngleInDegrees)
@@ -178,7 +211,7 @@ public class OrbitController : MonoBehaviour
     {
         GameObject obstacle = (GameObject)obstacleObj;
         obstacle.transform.position = position;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(gameController.restoreObstacleDelay);
         setSize(obstacle, 0.5f);
         obstacle.SetActive(true);
     }
@@ -187,5 +220,14 @@ public class OrbitController : MonoBehaviour
     {
         var p = 2 * Mathf.PI * Mathf.Sqrt((A * A + B * B) / 2);
         return spaceCraftSpeed / p;
+    }
+
+    void OnDestroy()
+    {
+        for (int i = 0; i < obstacles.Length; i++)
+        {
+            Destroy(obstacles[i]);
+        }
+        Destroy(portal);
     }
 }

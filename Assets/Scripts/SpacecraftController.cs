@@ -9,7 +9,6 @@ public class SpacecraftController : MonoBehaviour
     public float speed = 1;
 
     private float alpha;
-    private int currentIndex;
     private OrbitController currentOrbit;
 
     private GameController gameController;
@@ -23,6 +22,7 @@ public class SpacecraftController : MonoBehaviour
     public float spacecraftSpeed = 1500;
 
     private int destroyedObstacles = 0;
+    private bool afterCircle;
 
     public GameObject HUD;
 
@@ -40,33 +40,42 @@ public class SpacecraftController : MonoBehaviour
         RayShotPS.SetActive(false);
     }
 
-    public void SetOrbit(int index, float startingAngle)
+    void SetNextOrbit(OrbitController nextOrbit, float startingAngle)
     {
-        currentIndex = index;
-        currentOrbit = gameController.GetOrbit(index);
+        currentOrbit = nextOrbit;
         speed = currentOrbit.GetOrbitSpeed(spacecraftSpeed);
-        currentOrbit.RequestSpawnOfObstacles(index, startingAngle);
+        currentOrbit.RequestSpawnOfObstacles(startingAngle);
         x = currentOrbit.X;
         y = currentOrbit.Y;
         a = currentOrbit.A;
         b = currentOrbit.B;
         destroyedObstacles = 0;
         nextObstacleAngle = -1f;
+        afterCircle = false;
     }
+
+    public void StartWithOrbit(OrbitController orbit)
+    {
+        SetNextOrbit(orbit, 0);
+    } 
 
     // Update is called once per frame
     void Update()
     {
-        if (gameController.IsPause)
+        if (currentOrbit == null)
         {
             return;
         }
 
         var currentAngleInDegrees = GetCurrentAngleInDegrees();
 
-        if (nextObstacleAngle < 0 || (isNextObstacleDestroyed && currentAngleInDegrees > nextObstacleAngle))
+        if (nextObstacleAngle < 0 || (isNextObstacleDestroyed && currentAngleInDegrees > nextObstacleAngle && !afterCircle))
         {
             nextObstacleAngle = currentOrbit.GetNextObstacleAngle(currentAngleInDegrees);
+            if (nextObstacleAngle < currentAngleInDegrees)
+            {
+                afterCircle = true;
+            }
             isNextObstacleDestroyed = false;
         }
 
@@ -89,21 +98,22 @@ public class SpacecraftController : MonoBehaviour
         {
             needHandlePortalShot = false;
 
-            if (destroyedObstacles >= currentOrbit.requiredDestroyedObstacles)
+            if (destroyedObstacles >= currentOrbit.obstaclesCount)
             {
-                destroyedObstacles -= currentOrbit.requiredDestroyedObstacles;
+                destroyedObstacles -= currentOrbit.obstaclesCount;
                 particleSystem.maxParticles = destroyedObstacles;
                 particleSystem.Stop();
                 particleSystem.Play();
-                currentOrbit.CreatePortal(gameObject.transform.position);
-                speed *= 3;
-
+                if (currentOrbit.TryCreatePortal(currentAngleInDegrees))
+                {
+                    speed *= 3;
+                }
             }
         }
 
         if (currentOrbit.IsAroundPortal(gameObject.transform.position))
         {
-            SetOrbit(currentIndex + 1, GetCurrentAngleInDegrees());
+            SetNextOrbit(gameController.GetNextOrbit(), currentAngleInDegrees);
         }
 
         if (UnityEngine.Input.GetKeyDown(KeyCode.Space) || needHandleLaserShot)
@@ -113,7 +123,7 @@ public class SpacecraftController : MonoBehaviour
             if (coolDownCounter <= 0.0f)
             {
                 Debug.Log("Shooting");
-                Shoot();
+                Shoot(currentAngleInDegrees);
             }
             else
             {
@@ -121,13 +131,21 @@ public class SpacecraftController : MonoBehaviour
             }
         }
 
-        if (!isNextObstacleDestroyed && currentOrbit.GetDistanceToNextObstacle(currentAngleInDegrees) < criticalDistance)
+        var distance = currentOrbit.GetDistanceBetweenAngles(currentAngleInDegrees, nextObstacleAngle);
+
+        Debug.Log("Angle: " + currentAngleInDegrees + " Next Obstacle Angle: " + nextObstacleAngle + " Is Destroyed: " + isNextObstacleDestroyed + " Distance: " + distance);
+
+        if (!isNextObstacleDestroyed && distance < criticalDistance)
         {
             Destroy(gameObject);
             HUD.SetActive(true);
         }
 
         alpha += speed * Time.deltaTime;
+        if (GetCurrentAngleInDegrees() < currentAngleInDegrees)
+        {
+            afterCircle = false;
+        }
         gameObject.transform.position = GetSpacecraftPosition(alpha);
         gameObject.transform.LookAt(GetSpacecraftPosition(alpha + 1), currentOrbit.transform.up);
     }
@@ -139,6 +157,7 @@ public class SpacecraftController : MonoBehaviour
         {
             originalAngle -= 360;
         }
+        
         return originalAngle;
     }
 
@@ -152,11 +171,9 @@ public class SpacecraftController : MonoBehaviour
 
     public delegate void del();
 
-    private void Shoot()
+    private void Shoot(float currentAngle)
     {
-        //right now just search for closest obstacle
-        var currentAngle = GetCurrentAngleInDegrees();
-        var closest = currentOrbit.GetDistanceToNextObstacle(currentAngle);
+        var closest = currentOrbit.GetDistanceBetweenAngles(currentAngle, nextObstacleAngle);
         Debug.Log("Closest is: " + closest);
         if (closest<shotRange)
         {
