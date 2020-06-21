@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Input = InputWrapper.Input;
+using System.Collections;
 
 public class SpacecraftController : MonoBehaviour
 {
@@ -27,12 +28,15 @@ public class SpacecraftController : MonoBehaviour
 
     public ParticleSystem particleSystem;
 
+    public GameObject RayShotPS;
+
     private bool needHandlePortalShot = false;
 
     // Start is called before the first frame update
     void Start()
     {
         gameController = GameObject.FindObjectOfType<GameController>();
+        RayShotPS.SetActive(false);
     }
 
     public void SetOrbit(int index, float startingAngle)
@@ -95,7 +99,8 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.Stop();
                 particleSystem.Play();
                 currentOrbit.CreatePortal(gameObject.transform.position);
-                speed = 3;
+                speed *= 3;
+
             }
         }
 
@@ -147,6 +152,8 @@ public class SpacecraftController : MonoBehaviour
         return rotation * new Vector3(X, 0, Y);
     }
 
+    public delegate void del();
+
     private void Shoot()
     {
         //right now just search for closest obstacle
@@ -162,6 +169,47 @@ public class SpacecraftController : MonoBehaviour
         }
 
         coolDownCounter = coolDownAfterShot;
+
+        RayShotPS.SetActive(true);
+
+        StartCoroutine(AnimateSize(RayShotPS, 0.0f, 1.7f, 0.1f,new del(()=>{ StartCoroutine(ActivateRay()); })));
+
+        //StartCoroutine(ActivateRay());
+    }
+
+    protected IEnumerator AnimateSize(GameObject PS, float startValue, float endValue, float duration, del action)
+    {
+        float elapsedTime = 0;
+        float ratio = elapsedTime / duration;
+        while (ratio < 1f)
+        {
+            elapsedTime += Time.deltaTime;
+            ratio = elapsedTime / duration;
+
+            float size = startValue + (endValue - startValue) * ratio;
+
+            setSize(PS, size);
+
+            yield return null;
+        }
+
+        if (action != null)
+        {
+            action();
+        }
+    }
+
+    private void setSize(GameObject ps, float size)
+    {
+        Vector3 oldScale = ps.transform.localScale;
+        ps.transform.localScale = new Vector3(oldScale.x, oldScale.y, size);
+    }
+
+    private IEnumerator ActivateRay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        //RayShotPS.SetActive(false);
+        StartCoroutine(AnimateSize(RayShotPS, 1.7f, 0.0f, 0.1f, new del(() => { RayShotPS.SetActive(false); })));
     }
 
     public void RequestPortalShot()

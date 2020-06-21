@@ -16,6 +16,8 @@ public class OrbitController : MonoBehaviour
     public GameObject[] obstacles;
     public float[] obstacleAngles;
 
+    private GameObject lastSpawnedPortal;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -73,8 +75,8 @@ public class OrbitController : MonoBehaviour
     public void CreatePortal(Vector3 position)
     {
         portalPosition = position;
-        var portal = Instantiate(gameController.portal, position, Quaternion.identity);
-        portal.transform.up = transform.up;
+        lastSpawnedPortal = Instantiate(gameController.portal, position, Quaternion.identity);
+        lastSpawnedPortal.transform.up = transform.up;
         StartCoroutine("CanPortal");
     }
 
@@ -88,6 +90,12 @@ public class OrbitController : MonoBehaviour
     {
         if (canPortal && (portalPosition - position).magnitude < gameController.proximity)
         {
+            if (lastSpawnedPortal)
+            {
+                Destroy(lastSpawnedPortal);
+                lastSpawnedPortal = null;
+            }            
+
             return true;
         }
 
@@ -129,9 +137,14 @@ public class OrbitController : MonoBehaviour
 
         Vector3 savedPosition = nextObstacle.transform.position;
 
-        StartCoroutine(AnimateSize(nextObstacle,0.5f, 0.1f, 0.5f, new del(() => { nextObstacle.SetActive(false); })));
+        StartCoroutine(AnimateSize(nextObstacle,0.5f, 0.6f, 0.05f, new del(() => { scaledown(nextObstacle); })));
 
         StartCoroutine(RestoreObstacle(nextObstacle, savedPosition));
+    }
+
+    protected void scaledown(GameObject obstacle)
+    {
+        StartCoroutine(AnimateSize(obstacle, 0.6f, 0.1f, 0.25f, new del(() => { obstacle.SetActive(false); })));
     }
 
     protected IEnumerator AnimateSize(GameObject obstacle, float startValue, float endValue, float duration, del action)
