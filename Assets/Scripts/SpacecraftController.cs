@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Input = InputWrapper.Input;
+using System.Collections;
 
 public class SpacecraftController : MonoBehaviour
 {
@@ -27,12 +28,16 @@ public class SpacecraftController : MonoBehaviour
 
     public ParticleSystem particleSystem;
 
+    public GameObject RayShotPS;
+
     private bool needHandlePortalShot = false;
+    private bool needHandleLaserShot = false;
 
     // Start is called before the first frame update
     void Start()
     {
         gameController = GameObject.FindObjectOfType<GameController>();
+        RayShotPS.SetActive(false);
     }
 
     void SetNextOrbit(OrbitController nextOrbit, float startingAngle)
@@ -79,6 +84,16 @@ public class SpacecraftController : MonoBehaviour
             coolDownCounter -= Time.deltaTime;
         }
 
+        if (Input.touchCount > 0 && !needHandlePortalShot)
+        {
+            var touch = Input.GetTouch(0);
+
+            if (touch.phase == TouchPhase.Ended)
+            {
+                needHandleLaserShot = true;
+            }
+        }
+
         if (needHandlePortalShot)
         {
             needHandlePortalShot = false;
@@ -101,8 +116,9 @@ public class SpacecraftController : MonoBehaviour
             SetNextOrbit(gameController.GetNextOrbit(), currentAngleInDegrees);
         }
 
-        if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Space) || needHandleLaserShot)
         {
+            needHandleLaserShot = false;
             Debug.Log("Pressed shot");
             if (coolDownCounter <= 0.0f)
             {
@@ -153,7 +169,9 @@ public class SpacecraftController : MonoBehaviour
         return rotation * new Vector3(X, 0, Y);
     }
 
-    private void Shoot(float currentAngle)
+    public delegate void del();
+
+    private void Shoot()
     {
         var closest = currentOrbit.GetDistanceBetweenAngles(currentAngle, nextObstacleAngle);
         Debug.Log("Closest is: " + closest);
@@ -166,6 +184,47 @@ public class SpacecraftController : MonoBehaviour
         }
 
         coolDownCounter = coolDownAfterShot;
+
+        RayShotPS.SetActive(true);
+
+        StartCoroutine(AnimateSize(RayShotPS, 0.0f, 1.7f, 0.1f,new del(()=>{ StartCoroutine(ActivateRay()); })));
+
+        //StartCoroutine(ActivateRay());
+    }
+
+    protected IEnumerator AnimateSize(GameObject PS, float startValue, float endValue, float duration, del action)
+    {
+        float elapsedTime = 0;
+        float ratio = elapsedTime / duration;
+        while (ratio < 1f)
+        {
+            elapsedTime += Time.deltaTime;
+            ratio = elapsedTime / duration;
+
+            float size = startValue + (endValue - startValue) * ratio;
+
+            setSize(PS, size);
+
+            yield return null;
+        }
+
+        if (action != null)
+        {
+            action();
+        }
+    }
+
+    private void setSize(GameObject ps, float size)
+    {
+        Vector3 oldScale = ps.transform.localScale;
+        ps.transform.localScale = new Vector3(oldScale.x, oldScale.y, size);
+    }
+
+    private IEnumerator ActivateRay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        //RayShotPS.SetActive(false);
+        StartCoroutine(AnimateSize(RayShotPS, 1.7f, 0.0f, 0.1f, new del(() => { RayShotPS.SetActive(false); })));
     }
 
     public void RequestPortalShot()
