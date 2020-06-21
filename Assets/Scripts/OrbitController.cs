@@ -151,13 +151,17 @@ public class OrbitController : MonoBehaviour
         return obstacleAngles[nextObstacleIndex];
     }
 
-    public void DeactivateNextObstacle(float currentAngleInDegrees)
+    public bool DeactivateNextObstacle(float currentAngleInDegrees)
     {
         var nextObstacle = obstacles[GetNextObstacleIndex(currentAngleInDegrees)];
 
         var obstacleController = nextObstacle.GetComponent<ObstacleController>();
 
+        var isPlanet = obstacleController.IsPlanet();
+
         obstacleController.Shot();
+
+        return isPlanet;
     }
 
     public float GetOrbitSpeed(float spaceCraftSpeed)

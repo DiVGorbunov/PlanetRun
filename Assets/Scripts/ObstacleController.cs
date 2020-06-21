@@ -78,4 +78,9 @@ public class ObstacleController : MonoBehaviour
     {
         obstacle.transform.localScale = new Vector3(size, size, size);
     }
+
+    public bool IsPlanet()
+    {
+        return !isAsteroidInitialized;
+    }
 }
