@@ -540,8 +540,10 @@ MonoBehaviour:
   shotRange: 3
   criticalDistance: 0.1
   spacecraftSpeed: 1500
-  HUD: {fileID: 0}
   particleSystem: {fileID: 6544583800574281804}
+  capsule: {fileID: 7458333795939116522}
+  inactiveCapsule: {fileID: 2100000, guid: 0e98efe1f53f0914e8a000813f7b8df8, type: 2}
+  activeCapsule: {fileID: 2100000, guid: c17f4f212cfb527468eeccbee023892d, type: 2}
   RayShotPS: {fileID: 1529657245637743190}
 --- !u!1001 &1530737453965694322
 PrefabInstance:
