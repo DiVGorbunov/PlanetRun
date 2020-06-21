@@ -169,10 +169,8 @@ public class SpacecraftController : MonoBehaviour
         coolDownCounter = coolDownAfterShot;
 
         RayShotPS.SetActive(true);
-
-        StartCoroutine(AnimateSize(RayShotPS, 0.0f, 1.7f, 0.1f,new del(()=>{ StartCoroutine(ActivateRay()); })));
-
-        //StartCoroutine(ActivateRay());
+        AudioManager.StaticPlay("laser");
+        StartCoroutine(AnimateSize(RayShotPS, 0.0f, 1.7f, 0.05f,new del(()=>{ StartCoroutine(ActivateRay()); })));
     }
 
     protected IEnumerator AnimateSize(GameObject PS, float startValue, float endValue, float duration, del action)
@@ -205,9 +203,9 @@ public class SpacecraftController : MonoBehaviour
 
     private IEnumerator ActivateRay()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
         //RayShotPS.SetActive(false);
-        StartCoroutine(AnimateSize(RayShotPS, 1.7f, 0.0f, 0.1f, new del(() => { RayShotPS.SetActive(false); })));
+        StartCoroutine(AnimateSize(RayShotPS, 1.7f, 0.0f, 0.05f, new del(() => { RayShotPS.SetActive(false); })));
     }
 
     public void RequestPortalShot()
