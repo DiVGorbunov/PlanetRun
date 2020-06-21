@@ -19,12 +19,18 @@ public class SpacecraftController : MonoBehaviour
     private float nextObstacleAngle = -1f;
     private bool isNextObstacleDestroyed;
     private float coolDownCounter = 0.0f;
+
+    private bool isInPortal;
+    private bool hasPortal;
+
     public float spacecraftSpeed = 1500;
 
     private int destroyedObstacles = 0;
     private bool afterCircle;
 
     public ParticleSystem particleSystem;
+    public GameObject capsule;
+    public Material inactiveCapsule, activeCapsule;
 
     public GameObject RayShotPS;
 
@@ -50,6 +56,7 @@ public class SpacecraftController : MonoBehaviour
         destroyedObstacles = 0;
         nextObstacleAngle = -1f;
         afterCircle = false;
+        hasPortal = false;
     }
 
     public void StartWithOrbit(OrbitController orbit)
@@ -92,6 +99,22 @@ public class SpacecraftController : MonoBehaviour
             }
         }
 
+        if (!hasPortal &&
+            destroyedObstacles >= currentOrbit.obstaclesCount &&
+            currentOrbit.IsInPortalInterval(currentAngleInDegrees) &&
+            !isInPortal)
+        {
+            ActivateCapsule(true);
+            isInPortal = true;
+        }
+
+        if (isInPortal &&
+            !currentOrbit.IsInPortalInterval(currentAngleInDegrees))
+        {
+            ActivateCapsule(false);
+            isInPortal = false;
+        }
+
         if (needHandlePortalShot)
         {
             needHandlePortalShot = false;
@@ -104,6 +127,8 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.Play();
                 if (currentOrbit.TryCreatePortal(currentAngleInDegrees))
                 {
+                    hasPortal = true;
+                    ActivateCapsule(false);
                     speed *= gameController.accelerationMultiplier;
                 }
             }
@@ -228,5 +253,11 @@ public class SpacecraftController : MonoBehaviour
     public void RequestPortalShot()
     {
         needHandlePortalShot = true;
+    }
+
+    public void ActivateCapsule(bool isActive)
+    {
+        var meshRenderer = capsule.GetComponent<MeshRenderer>();
+        meshRenderer.material = isActive ? activeCapsule : inactiveCapsule;
     }
 }
