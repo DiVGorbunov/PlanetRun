@@ -31,6 +31,7 @@ public class SpacecraftController : MonoBehaviour
     public GameObject RayShotPS;
 
     private bool needHandlePortalShot = false;
+    private bool needHandleLaserShot = false;
 
     // Start is called before the first frame update
     void Start()
@@ -74,19 +75,15 @@ public class SpacecraftController : MonoBehaviour
             coolDownCounter -= Time.deltaTime;
         }
 
-        /*if (Input.touchCount > 0)
+        if (Input.touchCount > 0 && !needHandlePortalShot)
         {
             var touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Ended && destroyedObstacles>= currentOrbit.requiredDestroyedObstacles)
+
+            if (touch.phase == TouchPhase.Ended)
             {
-                destroyedObstacles -= currentOrbit.requiredDestroyedObstacles;
-                particleSystem.maxParticles = destroyedObstacles;
-                particleSystem.Stop();
-                particleSystem.Play();
-                currentOrbit.CreatePortal(gameObject.transform.position);
-                speed *= 3;
+                needHandleLaserShot = true;
             }
-        }*/
+        }
 
         if (needHandlePortalShot)
         {
@@ -109,8 +106,9 @@ public class SpacecraftController : MonoBehaviour
             SetOrbit(currentIndex + 1, GetCurrentAngleInDegrees());
         }
 
-        if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Space) || needHandleLaserShot)
         {
+            needHandleLaserShot = false;
             Debug.Log("Pressed shot");
             if (coolDownCounter <= 0.0f)
             {
