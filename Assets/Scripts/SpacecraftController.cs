@@ -171,7 +171,7 @@ public class SpacecraftController : MonoBehaviour
 
     public delegate void del();
 
-    private void Shoot()
+    private void Shoot(float currentAngle)
     {
         var closest = currentOrbit.GetDistanceBetweenAngles(currentAngle, nextObstacleAngle);
         Debug.Log("Closest is: " + closest);
