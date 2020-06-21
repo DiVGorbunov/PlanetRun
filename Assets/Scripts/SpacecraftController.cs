@@ -44,6 +44,8 @@ public class SpacecraftController : MonoBehaviour
     public GameObject SpaceShipModel;
     public ParticleSystem Explosion;
 
+    private bool isDead = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -98,7 +100,7 @@ public class SpacecraftController : MonoBehaviour
             coolDownCounter -= Time.deltaTime;
         }
 
-        if (Input.touchCount > 0 && !needHandlePortalShot)
+        if (Input.touchCount > 0 && !needHandlePortalShot && !isDead)
         {
             var touch = Input.GetTouch(0);
 
@@ -147,7 +149,7 @@ public class SpacecraftController : MonoBehaviour
         {
             currentScore += GetScore(true, false, GetLap(), speed, currentLevel);
             gameController.hudController.SetScore(currentScore);
-
+            AudioManager.StaticPlay("enter-portal");
             SetNextOrbit(gameController.GetNextOrbit(), currentAngleInDegrees);
         }
 
@@ -170,13 +172,16 @@ public class SpacecraftController : MonoBehaviour
 
         Debug.Log("Angle: " + currentAngleInDegrees + " Next Obstacle Angle: " + nextObstacleAngle + " Is Destroyed: " + isNextObstacleDestroyed + " Distance: " + distance);
 
-        if (!isNextObstacleDestroyed && distance < criticalDistance)
+        if (!isNextObstacleDestroyed && distance < criticalDistance && !isDead)
         {
             speed = 0;
             this.spacecraftSpeed = 0;
             SpaceShipModel.SetActive(false);
             Explosion.gameObject.SetActive(true);
             gameController.hudController.ShowEndGameScreen();
+            AudioManager.StaticPlay("died");
+            isDead = true;
+
         }
 
         alpha += speed * Time.deltaTime;
@@ -269,6 +274,8 @@ public class SpacecraftController : MonoBehaviour
 
     public void RequestPortalShot()
     {
+        if (isDead)
+        { return; }
         needHandlePortalShot = true;
     }
 

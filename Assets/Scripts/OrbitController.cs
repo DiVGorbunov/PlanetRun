@@ -86,6 +86,7 @@ public class OrbitController : MonoBehaviour
             portalPosition = GetPointByAngle(currentAngleInDegrees);
             portal = Instantiate(gameController.portal, portalPosition, Quaternion.identity);
             portal.transform.up = transform.up;
+            AudioManager.StaticPlay("spawn-portal");
             StartCoroutine("CanPortal");
 
             return true;

@@ -62,3 +62,21 @@ MonoBehaviour:
     pitch: 1
     loop: 0
     source: {fileID: 0}
+  - name: died
+    clip: {fileID: 8300000, guid: 35c388b21edf9a44fb009d0d0d071d26, type: 3}
+    volume: 0.487
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: spawn-portal
+    clip: {fileID: 8300000, guid: 29ed78c6ef0895c41909fa14c36a14c0, type: 3}
+    volume: 0.273
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: enter-portal
+    clip: {fileID: 8300000, guid: b8cb5be36e3e8104b8a4fbfc39289960, type: 3}
+    volume: 0.273
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
