@@ -1,33 +1,43 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class ObstacleController : MonoBehaviour
 {
-    public delegate void del();
-    // Start is called before the first frame update
-    void Start()
+    private GameController gameController;
+
+    public GameObject planet;
+    public GameObject asteroid;
+
+    private bool isAsteroidInitialized;
+
+    private void Start()
     {
-        
+        gameController = FindObjectOfType<GameController>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Shot()
     {
-        
+        Vector3 savedPosition = transform.position;
+
+        StartCoroutine(AnimateSize(gameObject, 0.5f, 0.6f, 0.05f, () => { scaledown(gameObject, savedPosition); }));
+
     }
 
-    public void DestroyObstacle()
+    protected void scaledown(GameObject obstacle, Vector3 savedPosition)
     {
-        StartCoroutine(AnimateSize(0.5f,0.1f,0.5f,null));
+        StartCoroutine(AnimateSize(obstacle, 0.6f, 0.1f, 0.25f, () => {
+
+            if (!isAsteroidInitialized)
+            {
+                planet.SetActive(false);
+            }
+
+            StartCoroutine(RestoreObstacle(obstacle, savedPosition));
+        }));
     }
 
-    public IEnumerator CanPortal()
-    {
-        yield return new WaitForSeconds(0.5f);
-    }
-
-    protected IEnumerator AnimateSize(float startValue, float endValue, float duration, del action)
+    protected IEnumerator AnimateSize(GameObject obstacle, float startValue, float endValue, float duration, Action action)
     {
         float elapsedTime = 0;
         float ratio = elapsedTime / duration;
@@ -38,7 +48,7 @@ public class ObstacleController : MonoBehaviour
 
             float size = startValue + (endValue - startValue) * ratio;
 
-            setSize(size);
+            setSize(obstacle, size);
 
             yield return null;
         }
@@ -49,8 +59,23 @@ public class ObstacleController : MonoBehaviour
         }
     }
 
-    private void setSize(float size)
+    private IEnumerator RestoreObstacle(object obstacleObj, Vector3 position)
     {
-        gameObject.transform.localScale = new Vector3(size, size, size);
+        GameObject obstacle = (GameObject)obstacleObj;
+        obstacle.transform.position = position;
+
+        if (!isAsteroidInitialized)
+        {
+            asteroid.SetActive(true);
+            isAsteroidInitialized = true;
+        }
+
+        yield return new WaitForSeconds(gameController.restoreObstacleDelay);
+        setSize(obstacle, 0.5f);
+    }
+
+    private void setSize(GameObject obstacle, float size)
+    {
+        obstacle.transform.localScale = new Vector3(size, size, size);
     }
 }
