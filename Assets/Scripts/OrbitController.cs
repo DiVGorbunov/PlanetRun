@@ -9,6 +9,7 @@ public class OrbitController : MonoBehaviour
     public float B => gameObject.transform.localScale.z / 2;
 
     public int obstaclesCount;
+    public (float, float)[] portalIntervals;
 
     private GameController gameController;
     private Vector3 portalPosition;
@@ -71,12 +72,34 @@ public class OrbitController : MonoBehaviour
         SpawnNewObstacles(obstaclesCount, startingAngle);
     }
 
-    public void CreatePortal(Vector3 position)
+    public bool IsInPortalInterval(float currentAngleInDegrees)
     {
-        portalPosition = position;
-        portal = Instantiate(gameController.portal, position, Quaternion.identity);
-        portal.transform.up = transform.up;
-        StartCoroutine("CanPortal");
+        for (int i = 0; i < portalIntervals.Length; i++)
+        {
+            if ((currentAngleInDegrees >= portalIntervals[i].Item1 && currentAngleInDegrees <= portalIntervals[i].Item2) ||
+                (portalIntervals[i].Item2 < portalIntervals[i].Item1 && currentAngleInDegrees <= portalIntervals[i].Item2) ||
+                (currentAngleInDegrees >= portalIntervals[i].Item1 && portalIntervals[i].Item2 < portalIntervals[i].Item1))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryCreatePortal(float currentAngleInDegrees)
+    {
+        if (IsInPortalInterval(currentAngleInDegrees))
+        {
+            portalPosition = GetPointByAngle(currentAngleInDegrees);
+            portal = Instantiate(gameController.portal, portalPosition, Quaternion.identity);
+            portal.transform.up = transform.up;
+            StartCoroutine("CanPortal");
+
+            return true;
+        }
+
+        return false;
     }
 
     public IEnumerator CanPortal()

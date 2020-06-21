@@ -86,8 +86,10 @@ public class SpacecraftController : MonoBehaviour
                 particleSystem.maxParticles = destroyedObstacles;
                 particleSystem.Stop();
                 particleSystem.Play();
-                currentOrbit.CreatePortal(gameObject.transform.position);
-                speed *= 3;
+                if (currentOrbit.TryCreatePortal(currentAngleInDegrees))
+                {
+                    speed *= 3;
+                }
             }
         }
 

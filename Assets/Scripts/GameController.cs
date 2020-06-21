@@ -29,6 +29,7 @@ public class GameController : MonoBehaviour
         orbitGameObject.transform.rotation = Quaternion.Euler(new Vector3(Random.Range(-30, 30), 0, Random.Range(-30, 30)));
         currentOrbit = orbitGameObject.GetComponent<OrbitController>();
         currentOrbit.obstaclesCount = 3;
+        currentOrbit.portalIntervals = new[] { (10f, 60f) };
         StartCoroutine(CreateNextOrbit(false));
 
         spacecraft.StartWithOrbit(currentOrbit);
@@ -57,6 +58,7 @@ public class GameController : MonoBehaviour
 
         nextOrbit = orbitGameObject.GetComponent<OrbitController>();
         nextOrbit.obstaclesCount = currentOrbit.obstaclesCount + 3;
+        nextOrbit.portalIntervals = new[] { (10f, 60f) };
     }
 
     public void Restart()
