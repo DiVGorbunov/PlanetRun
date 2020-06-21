@@ -24,8 +24,6 @@ public class SpacecraftController : MonoBehaviour
     private int destroyedObstacles = 0;
     private bool afterCircle;
 
-    public GameObject HUD;
-
     public ParticleSystem particleSystem;
 
     public GameObject RayShotPS;
@@ -138,7 +136,7 @@ public class SpacecraftController : MonoBehaviour
         if (!isNextObstacleDestroyed && distance < criticalDistance)
         {
             Destroy(gameObject);
-            HUD.SetActive(true);
+            gameController.hudController.ShowEndGameScreen();
         }
 
         alpha += speed * Time.deltaTime;

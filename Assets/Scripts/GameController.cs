@@ -8,6 +8,8 @@ public class GameController : MonoBehaviour
     public SpacecraftController spacecraft;
     public GameObject portal;
     public GameObject orbit;
+    public HUDController hudController;
+
     public float proximity = 0.2f;
     public float restoreObstacleDelay = 2f;
     public float accelerationMultiplier = 2f;
