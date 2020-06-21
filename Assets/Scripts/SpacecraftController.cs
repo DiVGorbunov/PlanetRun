@@ -37,6 +37,9 @@ public class SpacecraftController : MonoBehaviour
     private bool needHandlePortalShot = false;
     private bool needHandleLaserShot = false;
 
+    public GameObject SpaceShipModel;
+    public ParticleSystem Explosion;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -160,7 +163,10 @@ public class SpacecraftController : MonoBehaviour
 
         if (!isNextObstacleDestroyed && distance < criticalDistance)
         {
-            Destroy(gameObject);
+            speed = 0;
+            this.spacecraftSpeed = 0;
+            SpaceShipModel.SetActive(false);
+            Explosion.gameObject.SetActive(true);
             gameController.hudController.ShowEndGameScreen();
         }
 
