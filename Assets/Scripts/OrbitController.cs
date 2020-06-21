@@ -20,16 +20,6 @@ public class OrbitController : MonoBehaviour
 
     private GameObject lastSpawnedPortal;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
     public float[] GetRandomAnglesOnPerimeter(int number, float startingAngleInDegrees)
     {
         float[] angles = new float[number];
@@ -63,7 +53,7 @@ public class OrbitController : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             Vector3 position = GetPointByAngle(angles[i]);
-            GameObject obstacle = Instantiate(gameController.obstacle, position, Quaternion.identity);
+            GameObject obstacle = Instantiate(gameController.GetRandomObstacle(), position, Quaternion.identity);
             obstacle.transform.up = transform.up;
             obstacles[i] = obstacle;
         }
@@ -161,59 +151,13 @@ public class OrbitController : MonoBehaviour
         return obstacleAngles[nextObstacleIndex];
     }
 
-    public delegate void del();
-
     public void DeactivateNextObstacle(float currentAngleInDegrees)
     {
         var nextObstacle = obstacles[GetNextObstacleIndex(currentAngleInDegrees)];
-        //nextObstacle.SetActive(false);
 
-        Vector3 savedPosition = nextObstacle.transform.position;
+        var obstacleController = nextObstacle.GetComponent<ObstacleController>();
 
-        StartCoroutine(AnimateSize(nextObstacle,0.5f, 0.6f, 0.05f, new del(() => { scaledown(nextObstacle); })));
-
-        StartCoroutine(RestoreObstacle(nextObstacle, savedPosition));
-    }
-
-    protected void scaledown(GameObject obstacle)
-    {
-        StartCoroutine(AnimateSize(obstacle, 0.6f, 0.1f, 0.25f, new del(() => { obstacle.SetActive(false); })));
-    }
-
-    protected IEnumerator AnimateSize(GameObject obstacle, float startValue, float endValue, float duration, del action)
-    {
-        float elapsedTime = 0;
-        float ratio = elapsedTime / duration;
-        while (ratio < 1f)
-        {
-            elapsedTime += Time.deltaTime;
-            ratio = elapsedTime / duration;
-
-            float size = startValue + (endValue - startValue) * ratio;
-
-            setSize(obstacle, size);
-
-            yield return null;
-        }
-
-        if (action != null)
-        {
-            action();
-        }
-    }
-
-    private void setSize(GameObject obstacle, float size)
-    {
-        obstacle.transform.localScale = new Vector3(size, size, size);
-    }
-
-    private IEnumerator RestoreObstacle(object obstacleObj, Vector3 position)
-    {
-        GameObject obstacle = (GameObject)obstacleObj;
-        obstacle.transform.position = position;
-        yield return new WaitForSeconds(gameController.restoreObstacleDelay);
-        setSize(obstacle, 0.5f);
-        obstacle.SetActive(true);
+        obstacleController.Shot();
     }
 
     public float GetOrbitSpeed(float spaceCraftSpeed)
@@ -231,7 +175,15 @@ public class OrbitController : MonoBehaviour
                 Destroy(obstacles[i]);
             }
         }
-        
+
         Destroy(portal);
+
+        if (transform != null)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                Destroy(transform.GetChild(i).gameObject);
+            }
+        }
     }
 }
