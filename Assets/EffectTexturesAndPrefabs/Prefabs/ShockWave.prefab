@@ -284,7 +284,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 5
+      scalar: 30.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -4810,13 +4810,13 @@ ParticleSystemRenderer:
   m_ShadowBias: 0
   m_RenderAlignment: 1
   m_Pivot: {x: 0, y: 0, z: 0}
-  m_Flip: {x: 0, y: 0, z: 0}
+  m_Flip: {x: 1, y: 0, z: 0}
   m_UseCustomVertexStreams: 0
   m_EnableGPUInstancing: 0
   m_ApplyActiveColorSpace: 0
   m_AllowRoll: 1
   m_VertexStreams: 00010304
-  m_Mesh: {fileID: 4300000, guid: 611050965a7b66143b84e5b62ae17405, type: 3}
+  m_Mesh: {fileID: 3613567641014311022, guid: 3620990a60bed204fabf841d50efec48, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
