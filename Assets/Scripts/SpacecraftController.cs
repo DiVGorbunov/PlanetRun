@@ -133,9 +133,7 @@ public class SpacecraftController : MonoBehaviour
             if (destroyedObstacles >= currentOrbit.obstaclesCount)
             {
                 destroyedObstacles -= currentOrbit.obstaclesCount;
-                particleSystem.maxParticles = destroyedObstacles;
-                particleSystem.Stop();
-                particleSystem.Play();
+                particleSystem.Clear();
                 if (currentOrbit.TryCreatePortal(currentAngleInDegrees))
                 {
                     hasPortal = true;
@@ -223,7 +221,10 @@ public class SpacecraftController : MonoBehaviour
             destroyedObstacles += 1;
             var isPlanet = currentOrbit.DeactivateNextObstacle(currentAngle);
             isNextObstacleDestroyed = true;
-            particleSystem.maxParticles = destroyedObstacles;
+            if (isPlanet)
+            {
+                particleSystem.Emit(1);
+            }            
 
             currentScore += GetScore(false, isPlanet, GetLap(), speed, currentLevel);
             gameController.hudController.SetScore(currentScore);
