@@ -46,17 +46,24 @@ public class SpacecraftController : MonoBehaviour
 
     private bool isDead = false;
 
+    private Camera camera;
+    Vector3 cameraPos;
+    float cameraInterpolationTime = 0.2f;
+
     // Start is called before the first frame update
     void Start()
     {
         gameController = GameObject.FindObjectOfType<GameController>();
         RayShotPS.SetActive(false);
+        camera = GetComponentInChildren<Camera>();
+        cameraPos = camera.transform.localPosition;
     }
 
     void SetNextOrbit(OrbitController nextOrbit, float startingAngle)
     {
         currentOrbit = nextOrbit;
         speed = currentOrbit.GetOrbitSpeed(spacecraftSpeed);
+        StartCoroutine(AnimateCameraPos(camera.transform.localPosition, cameraPos, cameraInterpolationTime));
         currentOrbit.RequestSpawnOfObstacles(startingAngle);
         x = currentOrbit.X;
         y = currentOrbit.Y;
@@ -139,6 +146,7 @@ public class SpacecraftController : MonoBehaviour
                     hasPortal = true;
                     ActivateCapsule(false);
                     speed *= gameController.accelerationMultiplier;
+                    StartCoroutine(AnimateCameraPos(cameraPos, cameraPos - new Vector3(0.0f, 0.0f, 0.5f), cameraInterpolationTime));
                 }
             }
         }
@@ -257,6 +265,23 @@ public class SpacecraftController : MonoBehaviour
         if (action != null)
         {
             action();
+        }
+    }
+
+    protected IEnumerator AnimateCameraPos(Vector3 startPos, Vector3 endPos, float duration)
+    {
+        float elapsedTime = 0;
+        float ratio = elapsedTime / duration;
+        while (ratio < 1f)
+        {
+            elapsedTime += Time.deltaTime;
+            ratio = elapsedTime / duration;
+
+            Vector3 pos = startPos + (endPos - startPos) * ratio;
+
+            camera.transform.localPosition = pos;
+
+            yield return null;
         }
     }
 
