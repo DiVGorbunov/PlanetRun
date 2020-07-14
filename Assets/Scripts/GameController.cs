@@ -68,6 +68,11 @@ public class GameController : MonoBehaviour
 
     public void Restart()
     {
+        if (FindObjectOfType<SpacecraftController>().LastTutorialShown)
+        {
+            SaveSystem.Save();
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

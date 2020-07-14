@@ -25,7 +25,7 @@ public class StartMenuController : MonoBehaviour
     public void PressStart()
     {
         PlayClickSound();
-        SceneManager.LoadScene("OrbitScene");
+        SceneManager.LoadScene("AltOrbitScene");
     }
 
     public void PressHighScores()

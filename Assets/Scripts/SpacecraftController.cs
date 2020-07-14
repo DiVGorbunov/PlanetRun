@@ -31,6 +31,7 @@ public class SpacecraftController : MonoBehaviour
     public ParticleSystem particleSystem;
     public GameObject capsule;
     public Material inactiveCapsule, activeCapsule;
+    bool isCapsuleActivated = false;
 
     public GameObject RayShotPS;
 
@@ -50,6 +51,13 @@ public class SpacecraftController : MonoBehaviour
     Vector3 cameraPos;
     float cameraInterpolationTime = 0.2f;
 
+    public GameObject tutorialSuck;
+    public GameObject tutorialPortal;
+    public GameObject tutorialShoot;
+
+    bool needPortalTutorial = true;
+    public bool LastTutorialShown = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +65,18 @@ public class SpacecraftController : MonoBehaviour
         RayShotPS.SetActive(false);
         camera = GetComponentInChildren<Camera>();
         cameraPos = camera.transform.localPosition;
+
+        PlayerData data = SaveSystem.Load();
+        if (!data.isNew)
+        {
+            needPortalTutorial = false;
+            timeForTutorial = -1.0f;
+        }
+        else
+        {
+            needPortalTutorial = true;
+            timeForTutorial = 1.5f;
+        }
     }
 
     void SetNextOrbit(OrbitController nextOrbit, float startingAngle)
@@ -80,11 +100,32 @@ public class SpacecraftController : MonoBehaviour
     public void StartWithOrbit(OrbitController orbit)
     {
         SetNextOrbit(orbit, 0);
-    } 
+    }
+
+    float timeForTutorial = 1.5f;
 
     // Update is called once per frame
     void Update()
     {
+        if (timeForTutorial > 0.0f)
+        {
+            timeForTutorial -= Time.deltaTime;
+            if (timeForTutorial <= 0.0f)
+            {
+                Time.timeScale = 0.0f;
+                if (needPortalTutorial)
+                {
+                    tutorialSuck.SetActive(true);
+                }
+                else
+                {
+                    tutorialShoot.SetActive(true);
+                    LastTutorialShown = true;
+                }
+            }
+        }
+
+
         if (currentOrbit == null)
         {
             return;
@@ -139,10 +180,10 @@ public class SpacecraftController : MonoBehaviour
 
             if (destroyedObstacles >= currentOrbit.obstaclesCount)
             {
-                destroyedObstacles -= currentOrbit.obstaclesCount;
-                particleSystem.Clear();
                 if (currentOrbit.TryCreatePortal(currentAngleInDegrees))
                 {
+                    destroyedObstacles -= currentOrbit.obstaclesCount;
+                    particleSystem.Clear();
                     hasPortal = true;
                     ActivateCapsule(false);
                     speed *= gameController.accelerationMultiplier;
@@ -300,7 +341,15 @@ public class SpacecraftController : MonoBehaviour
 
     public void RequestPortalShot()
     {
+        if (Time.timeScale == 0.0f)
+        {
+            timeForTutorial = 0.5f;
+            HideTutorials();
+        }
+
         if (isDead)
+        { return; }
+        if (!isCapsuleActivated)
         { return; }
         needHandlePortalShot = true;
     }
@@ -309,6 +358,13 @@ public class SpacecraftController : MonoBehaviour
     {
         var meshRenderer = capsule.GetComponent<MeshRenderer>();
         meshRenderer.material = isActive ? activeCapsule : inactiveCapsule;
+        isCapsuleActivated = isActive;
+        if (needPortalTutorial && isActive)
+        {
+            needPortalTutorial = false;
+            tutorialPortal.SetActive(true);
+            Time.timeScale = 0.0f;
+        }
     }
 
     private int GetLap()
@@ -330,5 +386,19 @@ public class SpacecraftController : MonoBehaviour
         }
 
         return (int) (20 * level * speed / lap);
+    }
+
+    public void Shoot()
+    {
+        needHandleLaserShot = true;
+        HideTutorials();
+    }
+
+    public void HideTutorials()
+    {
+        Time.timeScale = 1.0f;
+        tutorialSuck.SetActive(false);
+        tutorialPortal.SetActive(false);
+        tutorialShoot.SetActive(false);
     }
 }

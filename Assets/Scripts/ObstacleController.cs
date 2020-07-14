@@ -32,6 +32,10 @@ public class ObstacleController : MonoBehaviour
             {
                 planet.SetActive(false);
             }
+            else
+            {
+                asteroid.SetActive(false);
+            }
 
             StartCoroutine(RestoreObstacle(obstacle, savedPosition));
         }));
@@ -64,13 +68,12 @@ public class ObstacleController : MonoBehaviour
         GameObject obstacle = (GameObject)obstacleObj;
         obstacle.transform.position = position;
 
+        yield return new WaitForSeconds(gameController.restoreObstacleDelay);
         if (!isAsteroidInitialized)
         {
-            asteroid.SetActive(true);
             isAsteroidInitialized = true;
         }
-
-        yield return new WaitForSeconds(gameController.restoreObstacleDelay);
+        asteroid.SetActive(true);
         setSize(obstacle, 0.5f);
     }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class OrbitController : MonoBehaviour
@@ -23,12 +24,19 @@ public class OrbitController : MonoBehaviour
     public float[] GetRandomAnglesOnPerimeter(int number, float startingAngleInDegrees)
     {
         float[] angles = new float[number];
-        float range = 360f / (number + 2);
+        float range = 360f / (number + 1);
         float offset = 5f;
+
+
+
         for (int i = 0; i < number; i++)
         {
-            var angleInDegrees = Random.Range(startingAngleInDegrees + 3 * range / 2 + i * range + offset,
-                startingAngleInDegrees + 3 * range / 2 + (i + 1) * range - offset);
+            //var angleInDegrees = Random.Range(startingAngleInDegrees + 3 * range / 2 + i * range + offset,
+            //    startingAngleInDegrees + 3 * range / 2 + (i + 1) * range - offset);
+            var angleInDegrees = startingAngleInDegrees + range * (i+1) + offset* Random.Range(-1.0f,1.0f);
+            //var angleInDegrees = Random.Range(startingAngleInDegrees + 3 * range / 2 + i * range + offset,
+             //   startingAngleInDegrees + 3 * range / 2 + (i + 1) * range - offset);
+
             angleInDegrees = angleInDegrees >= 360 ? angleInDegrees - 360 : angleInDegrees;
             angles[i] = angleInDegrees;
         }
@@ -168,7 +176,10 @@ public class OrbitController : MonoBehaviour
     public float GetOrbitSpeed(float spaceCraftSpeed)
     {
         var p = 2 * Mathf.PI * Mathf.Sqrt((A * A + B * B) / 2);
-        return spaceCraftSpeed / p;
+        return spaceCraftSpeed / 15;
+        //var p = 4 * (Mathf.PI * (A * B) + Mathf.Abs(A - B)) / (A + B);
+
+        //return /*spaceCraftSpeed*/ p*10;
     }
 
     void OnDestroy()
