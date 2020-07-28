@@ -30,7 +30,7 @@ public class SpacecraftController : MonoBehaviour
 
     public ParticleSystem particleSystem;
     public GameObject capsule;
-    public Material inactiveCapsule, activeCapsule;
+    public Material inactiveCapsule, activeCapsule, lightupCapsule;
     bool isCapsuleActivated = false;
 
     public GameObject RayShotPS;
@@ -58,6 +58,11 @@ public class SpacecraftController : MonoBehaviour
     bool needPortalTutorial = true;
     public bool LastTutorialShown = false;
 
+    public ParticleSystem SpeedPS;
+    public GameObject ShipTrail;
+
+    public Material skyMat;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -83,7 +88,10 @@ public class SpacecraftController : MonoBehaviour
     {
         currentOrbit = nextOrbit;
         speed = currentOrbit.GetOrbitSpeed(spacecraftSpeed);
-        StartCoroutine(AnimateCameraPos(camera.transform.localPosition, cameraPos, cameraInterpolationTime));
+        StartCoroutine(AnimateCameraPos(camera.transform.localPosition, cameraPos, 70.0f, 60.0f, cameraInterpolationTime));
+        SpeedPS.gameObject.SetActive(false);
+        ShipTrail.SetActive(false);
+        speedMode = false;
         currentOrbit.RequestSpawnOfObstacles(startingAngle);
         x = currentOrbit.X;
         y = currentOrbit.Y;
@@ -170,7 +178,7 @@ public class SpacecraftController : MonoBehaviour
         if (isInPortal &&
             !currentOrbit.IsInPortalInterval(currentAngleInDegrees))
         {
-            ActivateCapsule(false);
+            //ActivateCapsule(false);
             isInPortal = false;
         }
 
@@ -186,8 +194,13 @@ public class SpacecraftController : MonoBehaviour
                     particleSystem.Clear();
                     hasPortal = true;
                     ActivateCapsule(false);
+                    var meshRenderer = capsule.GetComponent<MeshRenderer>();
+                    meshRenderer.material = lightupCapsule;
                     speed *= gameController.accelerationMultiplier;
-                    StartCoroutine(AnimateCameraPos(cameraPos, cameraPos - new Vector3(0.0f, 0.0f, 0.5f), cameraInterpolationTime));
+                    StartCoroutine(AnimateCameraPos(cameraPos, cameraPos - new Vector3(0.0f, 0.0f, 0.5f), 60.0f, 70.0f, cameraInterpolationTime));
+                    speedMode = true;
+                    SpeedPS.gameObject.SetActive(true);
+                    ShipTrail.SetActive(true);
                 }
             }
         }
@@ -198,6 +211,8 @@ public class SpacecraftController : MonoBehaviour
             gameController.hudController.SetScore(currentScore);
             AudioManager.StaticPlay("enter-portal");
             SetNextOrbit(gameController.GetNextOrbit(), currentAngleInDegrees);
+
+            camera.GetComponent<Skybox>().material = skyMat;
         }
 
         if (UnityEngine.Input.GetKeyDown(KeyCode.Space) || needHandleLaserShot)
@@ -249,6 +264,39 @@ public class SpacecraftController : MonoBehaviour
         }
         
         return originalAngle;
+    }
+
+    Vector3 m_WeaponBobLocalPosition;
+
+    [Header("Weapon Bob")]
+    [Tooltip("Frequency at which the weapon will move around in the screen when the player is in movement")]
+    public float bobFrequency = 3f;
+    [Tooltip("How fast the weapon bob is applied, the bigger value the fastest")]
+    public float bobSharpness = 10f;
+    [Tooltip("Distance the weapon bobs when not aiming")]
+    public float defaultBobAmount = 0.05f;
+    [Tooltip("Distance the weapon bobs when aiming")]
+    public float aimingBobAmount = 0.02f;
+
+    float m_WeaponBobFactor = 0.5f;
+
+    bool speedMode = false;
+
+    private void LateUpdate()
+    {
+        if (speedMode)
+        {
+            float bobAmount = defaultBobAmount;
+            float frequency = bobFrequency;
+            float hBobValue = Mathf.Sin(Time.time * frequency) * bobAmount * m_WeaponBobFactor;
+            float vBobValue = ((Mathf.Sin(Time.time * frequency * 2f) * 0.5f) + 0.3f) * bobAmount * m_WeaponBobFactor;
+
+            // Apply weapon bob
+            m_WeaponBobLocalPosition.x = hBobValue;
+            m_WeaponBobLocalPosition.y = Mathf.Abs(vBobValue);
+
+            SpaceShipModel.transform.localPosition = m_WeaponBobLocalPosition;
+        }        
     }
 
     private Vector3 GetSpacecraftPosition(float newAlpha)
@@ -309,7 +357,7 @@ public class SpacecraftController : MonoBehaviour
         }
     }
 
-    protected IEnumerator AnimateCameraPos(Vector3 startPos, Vector3 endPos, float duration)
+    protected IEnumerator AnimateCameraPos(Vector3 startPos, Vector3 endPos, float startFov, float endFov, float duration)
     {
         float elapsedTime = 0;
         float ratio = elapsedTime / duration;
@@ -320,7 +368,9 @@ public class SpacecraftController : MonoBehaviour
 
             Vector3 pos = startPos + (endPos - startPos) * ratio;
 
-            camera.transform.localPosition = pos;
+            //camera.transform.localPosition = pos;
+            camera.fieldOfView = startFov + (endFov - startFov) * ratio;
+            SpeedPS.gameObject.GetComponent<ParticleSystemRenderer>().lengthScale = 0 + (35 - 0) * ratio;
 
             yield return null;
         }
